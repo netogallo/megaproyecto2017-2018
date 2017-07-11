@@ -1,0 +1,153 @@
+\documentclass{article}
+\usepackage{amsfonts} 
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\title{Tarea #1: Introducci\'{o}n}
+\begin{document}
+\maketitle
+El objetivo de esta tarea es entender a mayor profundidad algunos de los
+componentes utilizados para construir blockchains.
+\\\\
+Esta tarea intenta fomentar el trabajo de equipo y el intercambio de 
+conocimientos entre personas de distintas facultades. Por eso mismo, 
+por favor trabajen el deber juntos durante el periodo de clase 
+o en cualquier otro momento de la semana. Solo se entregar una hoja por
+clase.
+\\\\
+Este deber requiere un poco de programaci\'{o}n, la cual sera hecha por los
+alumnos de ciencias de la computaci\'{o}n. Sin embargo, el objetivo es que todos
+los estudiantes se familarizen con estos conceptos ya que seran utilizados a lo
+largo del curso. Por eso pido que todos trabajen juntos y tengan discusiones
+para que todos puedan entender los conceptos. La tarea es corta y el codigo
+necesario es simple para que sea facil que el grupo lleve un ritmo harmonioso.
+\\\\
+Este deber sera entregado como un programa de python llamado \emph{tarea1.py} el cual
+debe ser colocado en la carpeta ``Tareas/Tarea1/"" del repositorio de github de esta
+clase: \url{https://github.com/netogallo/megaproyecto2017-2018}.
+
+\section{Preparaci\'{o}n}
+\begin{enumerate}
+\item{Los estudiantes de ciencias de la computaci\'{o}n 
+    deben crear una cuenta en github.com y enviarme 
+    su usuario asi los agrego al repositorio de esta 
+    clase que se encuentra en: \url{https://github.com/netogallo/megaproyecto2017-2018}}
+\item{Para esta tarea se necesitara instalar 
+    \href{https://www.python.org/downloads/release/python-361/}{Python 3}.}
+\item{Durante este curso se utilizara git para llevar control de versiones y Github para 
+    publicar avances. Los estudiantes de ciencias de la computación, si 
+    no estan familiarizados con git, por favor seguir un 
+    \href{https://try.github.io/levels/1/challenges/1}{tutorial}.}
+\end{enumerate}
+
+\section{Hashes Criptograficos}
+
+Un hash criptografico es una funci\'{o}n $h: \{0,1\}^* \rightarrow \{0,1\}^n$ que
+recibe como entrada informaci\'{o}n representada en binario y produce un numero
+binario de $n$ digitos como salida. La asignaci\'{o}n de valores $v \in \{0,1\}^n$
+del rango de $h$ (tambien llamados hashes) a las entradas $e \in \{0,1\}^*$ del dominio de $h$
+debe suceder de tal forma que simule una asiganci\'{o}n aleatoria. En otras palabras,
+si uno solamente tiene un valor $v \in \{0,1\}$ resultante de aplicar el hash $h$ a alguna 
+entrada desconocida $e \in \{0,1\}^*$, es dificil determinar cual fue la entrada $e$ que se utilizo.
+\\\\
+En este incisio utilizaremos la biblioteca \emph{hashlib} de python para familiarizarnos
+con los hashes cryptograficos. Ahora abra una terminal de python y ejecute el siguiente codigo.
+
+\begin{lstlisting}
+import hashlib
+hashlib.sha256(b"Hola mundo").hexdigest()
+\end{lstlisting}
+\\
+Esto imprime la representaci\'{o}n hexadecimal del hash criptografico \emph{sha-256} 
+aplicado a la representacion binaria de ``Hola mundo". Este es el hash utilizado por
+los Bitcoins.
+\\\\
+Para esta tarea utlizaremos una version simplificada del hash \emph{sha-256} llamado \emph{sha-32}. Esta
+funci\'{o}n aplica el \emph{sha-256} a la entrada y toma los primerso 8 caracteres de la representaci\'{o}
+hexadecimal del resultado y retorna eso como resultado. Por ejemplo:
+\begin{lstlisting}
+sha32(b"Hola mundo") #produce: "ca8f60b2"
+\end{lstlisting} 
+\\\\
+Por favor crear una implementaci\'{o}n de la funci\'{o}n \emph{sha-32} y colocarla en
+\emph{tarea1.py}. Se permite utilizar la funci\'{o}n \emph{hashlib.sha256} de python en su
+implementaci\'{o}n.
+\section{Nonce}
+Poco a poco iremos aprendiendo acerca de las partes que conforman un blockchain.
+Tal como dice el nombre, un blockchain es una cadena de blocks. Empezaremos por
+explorar las partes que forman un block. Como primer punto de division, vamos
+a dividir el block en dos partes: El \emph{cuerpo} y el \emph{nonce}. Para los propositos de
+esta hoja, el cuerpo simplemente es informaci\'{o}n que no puede modificarse,
+mientras que el nonce es una parte del block que puede tener un valor arbitrario.
+Para este deber, los blocks seran representados por el string ``Block:" + nonce
+donde nonce es un string de 8 caracteres hexadecimales (0-9 y a-f) en minusculas.
+Por ejemplo: ``Block:abcd1234".
+\\\\
+Ahora proceda a calcular el valor \emph{sha-32} para los siguientes valores:
+\begin{lstlisting}
+print(sha32(str.encode("Block:00000000")))
+print(sha32(str.encode("Block:00000001")))
+print(sha32(str.encode("Block:00000002")))
+\end{lstlisting}
+\\\\
+Observe que tan solo con cambiar un caracter en la entrada, se produce
+un hash completamente diferente.
+\\\\
+Para finalizar esta secci\'{o}n, defina una funci\'{o}n llamada \emph{block} en \emph{tarea1.py} que
+dado un numero entero, produce el block correspondiente a ese numero. Por ejemplo:
+\begin{lstlisting}
+block(0) #produce: "Block:00000000"
+block(1) #produce: "Block:00000001"
+\end{lstlisting}
+\section{Target}
+Los blockchains tienen asociado a ellos una dificultad. Esta dificultad
+indica la cantidad de recursos computacionales que se deben invertir para
+producir un block nuevo. Esta dificultad esta dada en funci\'{o}n de un
+valor $t \in \{0,1\}^n$ llamado \emph{target}, donde $n$ es el numero de bits
+generados por el hash. En el caso de \emph{sha-32}, $n$ es 32 (8 digitos hexadecimales).
+\\\\
+Para que un block sea aceptado en un blockchain, el hash
+criptografico de ese block debe ser menor al target. En nuestro ejemplo,
+si el target para nuestro ejemplo es ``00009999" (representado hexadecimalmente),
+el block ``Block:00000010" con hash \emph{sha-32} de ``fc6d4fc4" seria rechazado por el
+blockchain ya que ``fc6d4fc4" $\not<$ ``00009999". En cambio, el block ``Block:0001bdb9"
+con hash ``00004def" seria aceptado por el blockchain ya que ``00004def" $<$ ``00009999".
+\\\\
+Como siguiente ejercicio, definir una funcion \emph{findBlock} en \emph{tarea1.py}
+que recibe como parametro un target, y retorna el primer block cuyo \emph{sha-32}
+retorne un valor menor a ese target. Por ejemplo:
+\begin{lstlisting}
+findBlock("000fffff") #produce: Block:0000023f
+findBlock("0000ffff") #produce: Block:0001bdb9
+findBlock("00000fff") #despues de un rato produce: Block:0033bb52
+\end{lstlisting}
+\\\\
+Como pueden observar, cada vez que se agrega un cero al target, es mucho m\'{a}s
+trabajoso encontrar un block que sea aceptado por el blockchain. En los blockchains
+reales, este target se cambia automaticamente en intervalos determinados (cada 1024 blocks para Bitcoin)
+de tal manera que a todas las computadoras que pertenecen al network de dicho blockchain
+les tome una cantidad fija de tiempo (10 minutos para Bitcoin) en encontrar un nonce
+con el cual el hash criptografico del block es menor al target.
+
+\end{document}
